@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/propmanager_db
+    username: propmanager_admin
+    password: supersecuredevpassword
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false   # Disable OSIV — prevents holding DB connections open
+                          # during HTTP response serialization (N+1 risk).
+
+app:
+  security:
+    jwt:
+      secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration-ms: 86400000        # 24 hours in milliseconds
+      refresh-expiration-ms: 604800000 # 7 days in milliseconds
+
+logging:
+  level:
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
+    # Suppresses the UserDetailsService config warning produced when a manual
+    # AuthenticationProvider bean is declared in SecurityConfig. The warning is
+    # expected and harmless — our DaoAuthenticationProvider is wired correctly.

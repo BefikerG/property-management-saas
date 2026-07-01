@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  postgres-dev:
+    image: postgres:16-alpine
+    container_name: propmanager_postgres_dev
+    environment:
+      POSTGRES_DB: propmanager_db
+      POSTGRES_USER: propmanager_admin
+      POSTGRES_PASSWORD: supersecuredevpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:
+
+  
