@@ -71,7 +71,7 @@ lifecycle verified end-to-end including adversarial tenant isolation tests.
 | Version | Milestone |
 |---|---|
 | `v0.1.0` | ✅ Foundation — Auth backbone, Org + Staff management |
-| `v0.2.0` | 🔲 Core Inventory — Property, Structure, Unit hierarchy |
+| `v0.2.0` | ✅ Core Inventory — Property, Structure, Unit hierarchy |
 | `v0.3.0` | 🔲 Tenant & Lease Management |
 | `v0.4.0` | 🔲 Billing Engine — Spring Batch, idempotent invoicing |
 | `v1.0.0` | 🔲 MVP Release |
