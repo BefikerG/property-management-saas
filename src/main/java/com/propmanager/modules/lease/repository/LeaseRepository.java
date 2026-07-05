@@ -14,49 +14,56 @@ public interface LeaseRepository extends JpaRepository<Lease, UUID> {
 
     @Query("SELECT l FROM Lease l WHERE l.id = :id AND l.tenantId = :tenantId")
     Optional<Lease> findByIdAndTenantId(
-        @Param("id")       UUID id,
-        @Param("tenantId") UUID tenantId
-    );
+            @Param("id") UUID id,
+            @Param("tenantId") UUID tenantId);
 
     @Query("""
-        SELECT l FROM Lease l
-        WHERE l.tenantId = :tenantId
-        ORDER BY l.createdAt DESC
-        """)
+            SELECT l FROM Lease l
+            WHERE l.tenantId = :tenantId
+            ORDER BY l.createdAt DESC
+            """)
     List<Lease> findAllByTenantId(@Param("tenantId") UUID tenantId);
 
     @Query("""
-        SELECT l FROM Lease l
-        WHERE l.tenantId = :tenantId
-          AND l.status = :status
-        ORDER BY l.createdAt DESC
-        """)
+            SELECT l FROM Lease l
+            WHERE l.tenantId = :tenantId
+              AND l.status = :status
+            ORDER BY l.createdAt DESC
+            """)
     List<Lease> findAllByTenantIdAndStatus(
-        @Param("tenantId") UUID        tenantId,
-        @Param("status")   LeaseStatus status
-    );
+            @Param("tenantId") UUID tenantId,
+            @Param("status") LeaseStatus status);
 
     @Query("""
-        SELECT l FROM Lease l
-        WHERE l.unit.id = :unitId
-          AND l.tenantId = :tenantId
-        ORDER BY l.createdAt DESC
-        """)
+            SELECT l FROM Lease l
+            WHERE l.unit.id = :unitId
+              AND l.tenantId = :tenantId
+            ORDER BY l.createdAt DESC
+            """)
     List<Lease> findAllByUnitIdAndTenantId(
-        @Param("unitId")   UUID unitId,
-        @Param("tenantId") UUID tenantId
-    );
+            @Param("unitId") UUID unitId,
+            @Param("tenantId") UUID tenantId);
 
     @Query("""
-        SELECT l FROM Lease l
-        WHERE l.tenantProfile.id = :tenantProfileId
-          AND l.tenantId = :tenantId
-        ORDER BY l.createdAt DESC
-        """)
+            SELECT l FROM Lease l
+            WHERE l.tenantProfile.id = :tenantProfileId
+              AND l.tenantId = :tenantId
+            ORDER BY l.createdAt DESC
+            """)
     List<Lease> findAllByTenantProfileIdAndTenantId(
-        @Param("tenantProfileId") UUID tenantProfileId,
-        @Param("tenantId")        UUID tenantId
-    );
+            @Param("tenantProfileId") UUID tenantProfileId,
+            @Param("tenantId") UUID tenantId);
+
+    /**
+     * ⚠️ CROSS-TENANT QUERY — FOR BILLING ENGINE USE ONLY.
+     * Returns ALL leases with the given status across ALL organizations.
+     * Must NEVER be called from any tenant-scoped business service.
+     * Calling this from a business service is a critical data isolation violation.
+     *
+     * Authorized callers: BillingJobConfig.activeLeaseReader() ONLY.
+     */
+    @Query("SELECT l FROM Lease l WHERE l.status = :status")
+    List<Lease> findAllByStatus(@Param("status") LeaseStatus status);
 
     /**
      * Checks whether a unit already has an ACTIVE lease.
@@ -66,13 +73,12 @@ public interface LeaseRepository extends JpaRepository<Lease, UUID> {
      * The database index remains the ultimate safety net under concurrency.
      */
     @Query("""
-        SELECT COUNT(l) > 0 FROM Lease l
-        WHERE l.unit.id = :unitId
-          AND l.tenantId = :tenantId
-          AND l.status = 'ACTIVE'
-        """)
+            SELECT COUNT(l) > 0 FROM Lease l
+            WHERE l.unit.id = :unitId
+              AND l.tenantId = :tenantId
+              AND l.status = 'ACTIVE'
+            """)
     boolean existsActiveLeasForUnit(
-        @Param("unitId")   UUID unitId,
-        @Param("tenantId") UUID tenantId
-    );
+            @Param("unitId") UUID unitId,
+            @Param("tenantId") UUID tenantId);
 }
