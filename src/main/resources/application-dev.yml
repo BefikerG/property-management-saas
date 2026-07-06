@@ -7,6 +7,11 @@ spring:
   jpa:
     open-in-view: false   # Disable OSIV — prevents holding DB connections open
                           # during HTTP response serialization (N+1 risk).
+  batch:
+    job:
+      enabled: false          # Prevent Spring Batch from auto-running jobs on startup
+    jdbc:
+      initialize-schema: always  # Auto-create spring_batch schema tables
 
 app:
   security:
@@ -14,6 +19,8 @@ app:
       secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
       expiration-ms: 86400000        # 24 hours in milliseconds
       refresh-expiration-ms: 604800000 # 7 days in milliseconds
+  billing:
+    cron: "0 0 6 * * *"      # Daily at 06:00 — configurable per environment
 
 logging:
   level:

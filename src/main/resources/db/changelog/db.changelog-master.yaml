@@ -20,5 +20,12 @@ databaseChangeLog:
   - include:
       file: db/changelog/migrations/V007__create_leases_table.sql
       relativeToChangelogFile: false
-
-      
+  - include:
+      file: db/changelog/migrations/V008__create_invoices_table.sql
+      relativeToChangelogFile: false
+  - include:
+      file: db/changelog/migrations/V009__create_payments_table.sql
+      relativeToChangelogFile: false
+  - include:
+      file: db/changelog/migrations/V010__create_spring_batch_tables.sql
+      relativeToChangelogFile: false
