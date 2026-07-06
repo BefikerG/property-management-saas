@@ -60,11 +60,6 @@ OpenAPI docs available at `http://localhost:8080/swagger-ui/index.html`.
 | PATCH | /api/v1/staff-members/{id}/reactivate | JWT · ADMINISTRATOR | Reactivate account |
 | PATCH | /api/v1/staff-members/{id}/role | JWT · ADMINISTRATOR | Change role |
 
-## Current Milestone
-
-`v0.1.0` — Foundation complete.
-Multi-tenant auth backbone, organization management, and staff member
-lifecycle verified end-to-end including adversarial tenant isolation tests.
 
 ## Roadmap
 
@@ -74,7 +69,7 @@ lifecycle verified end-to-end including adversarial tenant isolation tests.
 | `v0.2.0` | ✅ Core Inventory — Property, Structure, Unit hierarchy |
 | `v0.3.0` | ✅ Tenant & Lease Management |
 | `v0.4.0` | ✅ Billing Engine — Spring Batch, idempotent invoicing |
-| `v1.0.0` | 🔲 MVP Release |
+| `v1.0.0` | ✅ MVP Release |
 
 ## License
 
