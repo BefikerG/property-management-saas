@@ -96,9 +96,11 @@ public class LeaseServiceImpl implements LeaseService {
         }
 
         Lease saved = leaseRepository.save(lease);
+        leaseRepository.flush();
         log.info("Lease created. ID: [{}], Status: DRAFT, Unit: [{}]",
             saved.getId(), saved.getUnit().getId());
-        return leaseMapper.toResponseDto(saved);
+        return leaseMapper.toResponseDto(
+            leaseRepository.findByIdAndTenantId(saved.getId(), tenantId).orElseThrow());
     }
 
     // ── Read ─────────────────────────────────────────────────────────

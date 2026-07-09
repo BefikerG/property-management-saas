@@ -127,8 +127,11 @@ public class BillingJobConfig {
                       "period [{}] — skipping.", lease.getId(), billingPeriod);
             return null;
         }
-        LocalDate dueDate = LocalDate.now()
-            .withDayOfMonth(lease.getBillingDay().intValue());
+        LocalDate today = LocalDate.now();
+        int billingDay = lease.getBillingDay().intValue();
+        LocalDate dueDate = today.getDayOfMonth() <= billingDay
+                ? today.withDayOfMonth(billingDay)
+                : today.plusMonths(1).withDayOfMonth(billingDay);
         Invoice invoice = new Invoice();
         invoice.setTenantId(lease.getTenantId());
         invoice.setLease(lease);

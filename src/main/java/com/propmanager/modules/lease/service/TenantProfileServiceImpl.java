@@ -42,10 +42,12 @@ public class TenantProfileServiceImpl implements TenantProfileService {
         TenantProfile profile = tenantProfileMapper.toEntity(requestDto);
         profile.setTenantId(tenantId);
         TenantProfile saved = tenantProfileRepository.save(profile);
+        tenantProfileRepository.flush();
 
         log.info("Tenant profile created. ID: [{}], Email: [{}], Org: [{}]",
             saved.getId(), saved.getEmail(), tenantId);
-        return tenantProfileMapper.toResponseDto(saved);
+        return tenantProfileMapper.toResponseDto(
+            tenantProfileRepository.findByIdAndTenantId(saved.getId(), tenantId).orElseThrow());
     }
 
     @Override

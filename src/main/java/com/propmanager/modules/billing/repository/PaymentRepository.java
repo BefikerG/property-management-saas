@@ -7,9 +7,16 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
+
+    @Query("SELECT p FROM Payment p WHERE p.id = :id AND p.tenantId = :tenantId")
+    Optional<Payment> findByIdAndTenantId(
+        @Param("id")       UUID id,
+        @Param("tenantId") UUID tenantId
+    );
 
     @Query("""
         SELECT p FROM Payment p

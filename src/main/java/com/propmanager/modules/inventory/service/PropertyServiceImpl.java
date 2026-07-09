@@ -49,10 +49,12 @@ public class PropertyServiceImpl implements PropertyService {
         Property property = propertyMapper.toEntity(requestDto);
         property.setTenantId(tenantId);
         Property saved = propertyRepository.save(property);
+        propertyRepository.flush();
 
         log.info("Property created. ID: [{}], Name: '{}', Org: [{}]",
             saved.getId(), saved.getName(), tenantId);
-        return propertyMapper.toResponseDto(saved);
+        return propertyMapper.toResponseDto(
+            propertyRepository.findByIdAndTenantId(saved.getId(), tenantId).orElseThrow());
     }
 
     @Override
@@ -150,8 +152,10 @@ public class PropertyServiceImpl implements PropertyService {
         }
 
         PropertyStructure saved = structureRepository.save(structure);
+        structureRepository.flush();
         log.info("Structure created. ID: [{}]", saved.getId());
-        return structureMapper.toResponseDto(saved);
+        return structureMapper.toResponseDto(
+            structureRepository.findByIdAndTenantId(saved.getId(), tenantId).orElseThrow());
     }
 
     @Override
@@ -204,9 +208,11 @@ public class PropertyServiceImpl implements PropertyService {
         }
 
         Unit saved = unitRepository.save(unit);
+        unitRepository.flush();
         log.info("Unit created. ID: [{}], Number: '{}', Status: {}",
             saved.getId(), saved.getUnitNumber(), saved.getStatus());
-        return unitMapper.toResponseDto(saved);
+        return unitMapper.toResponseDto(
+            unitRepository.findByIdAndTenantId(saved.getId(), tenantId).orElseThrow());
     }
 
     @Override

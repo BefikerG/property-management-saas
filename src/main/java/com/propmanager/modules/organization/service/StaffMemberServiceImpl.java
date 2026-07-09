@@ -69,11 +69,13 @@ public class StaffMemberServiceImpl implements StaffMemberService {
         staffMember.setRole(requestDto.getRole());
 
         StaffMember saved = staffMemberRepository.save(staffMember);
+        staffMemberRepository.flush();
 
         log.info("Staff member created. ID: [{}], Email: [{}], Role: [{}], Org: [{}]",
             saved.getId(), saved.getEmail(), saved.getRole(), tenantId);
 
-        return staffMemberMapper.toResponseDto(saved);
+        return staffMemberMapper.toResponseDto(
+            staffMemberRepository.findByIdAndTenantId(saved.getId(), tenantId).orElseThrow());
     }
 
     @Override

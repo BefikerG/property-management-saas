@@ -6,10 +6,15 @@ import com.propmanager.modules.organization.dto.OrganizationRequestDto;
 import com.propmanager.modules.organization.dto.OrganizationResponseDto;
 import com.propmanager.modules.organization.entity.OrgStatus;
 import com.propmanager.modules.organization.entity.Organization;
+import com.propmanager.modules.organization.entity.StaffMember;
+import com.propmanager.modules.organization.entity.StaffRole;
+import com.propmanager.modules.organization.entity.StaffStatus;
 import com.propmanager.modules.organization.mapper.OrganizationMapper;
 import com.propmanager.modules.organization.repository.OrganizationRepository;
+import com.propmanager.modules.organization.repository.StaffMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +42,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final OrganizationMapper     organizationMapper;
+    private final StaffMemberRepository  staffMemberRepository;
+    private final PasswordEncoder        passwordEncoder;
 
     @Override
     @Transactional
@@ -52,11 +59,42 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Organization organization = organizationMapper.toEntity(requestDto);
         Organization saved = organizationRepository.save(organization);
+        organizationRepository.flush();
 
         log.info("Organization registered successfully. ID: {}, Name: '{}'",
             saved.getId(), saved.getName());
 
-        return organizationMapper.toResponseDto(saved);
+        // Admin bootstrap: if admin fields are provided, create the first ADMINISTRATOR
+        // atomically within this transaction.
+        //
+        // Why we do NOT delegate to StaffMemberService.createStaffMember() here:
+        //   createStaffMember() reads TenantContext.getCurrentTenantId(), which is null
+        //   during this unauthenticated registration request (no JWT token, no filter).
+        //   Instead, we build the StaffMember entity directly and supply the tenantId
+        //   from the newly persisted organization's ID — this is the correct bootstrap path.
+        if (requestDto.getAdminEmail() != null && !requestDto.getAdminEmail().isBlank()
+                && requestDto.getAdminPassword() != null && !requestDto.getAdminPassword().isBlank()) {
+
+            String fullName = (requestDto.getAdminFullName() != null
+                    && !requestDto.getAdminFullName().isBlank())
+                    ? requestDto.getAdminFullName()
+                    : requestDto.getAdminEmail(); // sensible fallback if fullName is omitted
+
+            StaffMember admin = new StaffMember();
+            admin.setTenantId(saved.getId());
+            admin.setEmail(requestDto.getAdminEmail().trim());
+            admin.setPasswordHash(passwordEncoder.encode(requestDto.getAdminPassword()));
+            admin.setFullName(fullName);
+            admin.setRole(StaffRole.ADMINISTRATOR);
+            admin.setStatus(StaffStatus.ACTIVE);
+            staffMemberRepository.save(admin);
+
+            log.info("Bootstrap admin created for org [{}]: email=[{}]",
+                    saved.getId(), requestDto.getAdminEmail());
+        }
+
+        return organizationMapper.toResponseDto(
+            organizationRepository.findById(saved.getId()).orElseThrow());
     }
 
     @Override

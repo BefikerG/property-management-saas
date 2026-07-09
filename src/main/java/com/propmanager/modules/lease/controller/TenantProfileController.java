@@ -80,8 +80,8 @@ public class TenantProfileController {
         return ResponseEntity.ok(tenantProfileService.findAll());
     }
 
-    @Operation(summary = "Update a tenant profile",
-        description = "Updates contact information for an existing tenant profile.")
+    @Operation(summary = "Replace a tenant profile",
+        description = "Replaces the entire tenant profile resource with the provided data.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Tenant profile updated."),
         @ApiResponse(responseCode = "400", description = "Validation failure."),
@@ -91,7 +91,7 @@ public class TenantProfileController {
         @ApiResponse(responseCode = "409", description = "Email already in use."),
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<TenantProfileResponseDto> update(
         @PathVariable UUID id,
         @Valid @RequestBody TenantProfileRequestDto requestDto
