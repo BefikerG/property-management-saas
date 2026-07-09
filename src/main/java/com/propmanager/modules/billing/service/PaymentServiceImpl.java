@@ -77,7 +77,8 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setTenantId(tenantId);
         payment.setInvoice(invoice);
         payment.setPaidAt(LocalDateTime.now());
-        paymentRepository.save(payment);
+        Payment saved = paymentRepository.save(payment);
+        paymentRepository.flush();
 
         // ── Step 4: Recalculate amount_paid from database sum ─────────
         // Fetch the authoritative sum from the database rather than
@@ -95,7 +96,8 @@ public class PaymentServiceImpl implements PaymentService {
                  "amount_paid: [{}], amount_due: [{}]",
             invoiceId, invoice.getStatus(), totalPaid, invoice.getAmountDue());
 
-        return paymentMapper.toResponseDto(payment);
+        return paymentMapper.toResponseDto(
+            paymentRepository.findByIdAndTenantId(saved.getId(), tenantId).orElseThrow());
     }
 
     @Override

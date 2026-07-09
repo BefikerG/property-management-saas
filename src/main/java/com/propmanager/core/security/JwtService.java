@@ -37,7 +37,7 @@ import java.util.function.Function;
  *   iat      — issued-at timestamp (Unix epoch seconds)
  *   exp      — expiry timestamp (Unix epoch seconds)
  *
- * Algorithm: HMAC-SHA256 (HS256) with a minimum 256-bit secret key.
+ * Algorithm: HMAC-SHA512 (HS512) with a minimum 512-bit secret key.
  *
  * Why HMAC-SHA256 over RSA:
  *   For a single-application monolith where the same service both issues
@@ -221,7 +221,7 @@ public class JwtService {
     }
 
     /**
-     * Derives the HMAC-SHA256 SecretKey from the configured hex-encoded
+     * Derives the HMAC-SHA512 SecretKey from the configured hex-encoded
      * secret string. Called on every token parse/generation to avoid
      * holding a mutable key reference as a field.
      */

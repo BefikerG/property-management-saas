@@ -79,8 +79,8 @@ public class PropertyController {
         return ResponseEntity.ok(propertyService.findPropertyById(id));
     }
 
-    @Operation(summary = "Update a property",
-        description = "Updates the details of an existing property.")
+    @Operation(summary = "Replace a property",
+        description = "Replaces the entire property resource with the provided data.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Property updated."),
         @ApiResponse(responseCode = "400", description = "Validation failure."),
@@ -90,7 +90,7 @@ public class PropertyController {
         @ApiResponse(responseCode = "409", description = "Property name already taken."),
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<PropertyResponseDto> updateProperty(
         @PathVariable UUID id,
         @Valid @RequestBody PropertyRequestDto requestDto

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 /**
  * Centralized exception handler for the entire platform.
@@ -83,7 +84,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(ErrorResponse.ofValidation("VALIDATION_FAILURE", errors));
-    }
+}
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleDeserializationError(
+        HttpMessageNotReadableException ex
+    ) {
+        log.warn("Request body deserialization failed: {}", ex.getMessage());
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse.of(
+                    "INVALID_REQUEST_BODY",
+                    "Request body contains an invalid or unrecognized value. " +
+                    "Check enum field values against the API specification."
+            ));
+}
+
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
