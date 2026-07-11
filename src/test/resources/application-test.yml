@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16:///tenant_test_db
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    show-sql: false
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    enabled: true
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
+logging:
+  level:
+    com.propmanager: WARN
+    org.springframework.security: WARN
+    org.testcontainers: WARN
+    liquibase: WARN
+
+app:
+  security:
+    jwt:
+      secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration-ms: 86400000
+      refresh-expiration-ms: 604800000
+  billing:
+    cron: "0 0 6 * * *"
+    
