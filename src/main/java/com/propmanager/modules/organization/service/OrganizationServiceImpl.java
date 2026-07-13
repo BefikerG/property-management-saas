@@ -18,7 +18,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.propmanager.core.audit.AuditActionType;
+import com.propmanager.core.audit.AuditActorResolver;
+import com.propmanager.core.audit.AuditDomainEvent;
+import com.propmanager.core.audit.AuditEntityType;
+import com.propmanager.core.audit.snapshot.OrganizationAuditSnapshot;
+import org.springframework.context.ApplicationEventPublisher;
+
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -40,10 +48,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrganizationServiceImpl implements OrganizationService {
 
-    private final OrganizationRepository organizationRepository;
-    private final OrganizationMapper     organizationMapper;
-    private final StaffMemberRepository  staffMemberRepository;
-    private final PasswordEncoder        passwordEncoder;
+    private final OrganizationRepository    organizationRepository;
+    private final OrganizationMapper        organizationMapper;
+    private final StaffMemberRepository     staffMemberRepository;
+    private final PasswordEncoder           passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
+    private final AuditActorResolver        auditActorResolver;
 
     @Override
     @Transactional
@@ -92,6 +102,17 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.info("Bootstrap admin created for org [{}]: email=[{}]",
                     saved.getId(), requestDto.getAdminEmail());
         }
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this,
+            saved.getId(),
+            saved.getId(), // bootstrap actorId
+            AuditEntityType.ORGANIZATION,
+            saved.getId(),
+            AuditActionType.CREATE,
+            null,
+            OrganizationAuditSnapshot.of(saved)
+        ));
 
         return organizationMapper.toResponseDto(
             organizationRepository.findById(saved.getId()).orElseThrow());
@@ -143,6 +164,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setStatus(OrgStatus.SUSPENDED);
         Organization saved = organizationRepository.save(organization);
 
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this,
+            saved.getId(), // org ID is tenant ID
+            auditActorResolver.resolveActorId(),
+            AuditEntityType.ORGANIZATION,
+            saved.getId(),
+            AuditActionType.STATUS_CHANGE,
+            Map.of("status", OrgStatus.ACTIVE.name()),
+            Map.of("status", saved.getStatus().name())
+        ));
+
         log.info("Organization suspended. ID: {}", saved.getId());
         return organizationMapper.toResponseDto(saved);
     }
@@ -167,6 +199,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organization.setStatus(OrgStatus.ACTIVE);
         Organization saved = organizationRepository.save(organization);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this,
+            saved.getId(), // org ID is tenant ID
+            auditActorResolver.resolveActorId(),
+            AuditEntityType.ORGANIZATION,
+            saved.getId(),
+            AuditActionType.STATUS_CHANGE,
+            Map.of("status", OrgStatus.SUSPENDED.name()),
+            Map.of("status", saved.getStatus().name())
+        ));
 
         log.info("Organization reactivated. ID: {}", saved.getId());
         return organizationMapper.toResponseDto(saved);

@@ -15,6 +15,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.propmanager.core.audit.AuditActionType;
+import com.propmanager.core.audit.AuditActorResolver;
+import com.propmanager.core.audit.AuditDomainEvent;
+import com.propmanager.core.audit.AuditEntityType;
+import com.propmanager.core.audit.snapshot.StaffMemberAuditSnapshot;
+import org.springframework.context.ApplicationEventPublisher;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -43,9 +50,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StaffMemberServiceImpl implements StaffMemberService {
 
-    private final StaffMemberRepository staffMemberRepository;
-    private final StaffMemberMapper     staffMemberMapper;
-    private final PasswordEncoder       passwordEncoder;
+    private final StaffMemberRepository     staffMemberRepository;
+    private final StaffMemberMapper         staffMemberMapper;
+    private final PasswordEncoder           passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
+    private final AuditActorResolver        auditActorResolver;
 
     @Override
     @Transactional
@@ -70,6 +79,17 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 
         StaffMember saved = staffMemberRepository.save(staffMember);
         staffMemberRepository.flush();
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this,
+            tenantId,
+            auditActorResolver.resolveActorId(),
+            AuditEntityType.STAFF_MEMBER,
+            saved.getId(),
+            AuditActionType.CREATE,
+            null,
+            StaffMemberAuditSnapshot.of(saved)
+        ));
 
         log.info("Staff member created. ID: [{}], Email: [{}], Role: [{}], Org: [{}]",
             saved.getId(), saved.getEmail(), saved.getRole(), tenantId);
@@ -129,8 +149,20 @@ public class StaffMemberServiceImpl implements StaffMemberService {
             );
         }
 
+        StaffMemberAuditSnapshot before = StaffMemberAuditSnapshot.of(staffMember);
         staffMember.setStatus(StaffStatus.DEACTIVATED);
         StaffMember saved = staffMemberRepository.save(staffMember);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this,
+            tenantId,
+            auditActorResolver.resolveActorId(),
+            AuditEntityType.STAFF_MEMBER,
+            saved.getId(),
+            AuditActionType.DEACTIVATE,
+            before,
+            StaffMemberAuditSnapshot.of(saved)
+        ));
 
         log.info("Staff member deactivated. ID: [{}]", saved.getId());
         return staffMemberMapper.toResponseDto(saved);
@@ -157,8 +189,20 @@ public class StaffMemberServiceImpl implements StaffMemberService {
             );
         }
 
+        StaffMemberAuditSnapshot before = StaffMemberAuditSnapshot.of(staffMember);
         staffMember.setStatus(StaffStatus.ACTIVE);
         StaffMember saved = staffMemberRepository.save(staffMember);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this,
+            tenantId,
+            auditActorResolver.resolveActorId(),
+            AuditEntityType.STAFF_MEMBER,
+            saved.getId(),
+            AuditActionType.REACTIVATE,
+            before,
+            StaffMemberAuditSnapshot.of(saved)
+        ));
 
         log.info("Staff member reactivated. ID: [{}]", saved.getId());
         return staffMemberMapper.toResponseDto(saved);
@@ -179,8 +223,20 @@ public class StaffMemberServiceImpl implements StaffMemberService {
                 "No staff member found with ID: " + id
             ));
 
+        StaffMemberAuditSnapshot before = StaffMemberAuditSnapshot.of(staffMember);
         staffMember.setRole(requestDto.getRole());
         StaffMember saved = staffMemberRepository.save(staffMember);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this,
+            tenantId,
+            auditActorResolver.resolveActorId(),
+            AuditEntityType.STAFF_MEMBER,
+            saved.getId(),
+            AuditActionType.ROLE_CHANGE,
+            before,
+            StaffMemberAuditSnapshot.of(saved)
+        ));
 
         log.info("Role changed. ID: [{}], New Role: [{}]", saved.getId(), saved.getRole());
         return staffMemberMapper.toResponseDto(saved);

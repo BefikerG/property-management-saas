@@ -7,6 +7,12 @@ import com.propmanager.modules.lease.dto.TenantProfileRequestDto;
 import com.propmanager.modules.lease.dto.TenantProfileResponseDto;
 import com.propmanager.modules.lease.entity.TenantProfile;
 import com.propmanager.modules.lease.mapper.TenantProfileMapper;
+import com.propmanager.core.audit.AuditActionType;
+import com.propmanager.core.audit.AuditActorResolver;
+import com.propmanager.core.audit.AuditDomainEvent;
+import com.propmanager.core.audit.AuditEntityType;
+import com.propmanager.core.audit.snapshot.TenantProfileAuditSnapshot;
+import org.springframework.context.ApplicationEventPublisher;
 import com.propmanager.modules.lease.repository.TenantProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +27,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TenantProfileServiceImpl implements TenantProfileService {
 
-    private final TenantProfileRepository tenantProfileRepository;
-    private final TenantProfileMapper     tenantProfileMapper;
+    private final TenantProfileRepository     tenantProfileRepository;
+    private final TenantProfileMapper         tenantProfileMapper;
+    private final ApplicationEventPublisher   eventPublisher;
+    private final AuditActorResolver          auditActorResolver;
 
     @Override
     @Transactional
@@ -43,6 +51,12 @@ public class TenantProfileServiceImpl implements TenantProfileService {
         profile.setTenantId(tenantId);
         TenantProfile saved = tenantProfileRepository.save(profile);
         tenantProfileRepository.flush();
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.TENANT_PROFILE, saved.getId(),
+            AuditActionType.CREATE, null, TenantProfileAuditSnapshot.of(saved)
+        ));
 
         log.info("Tenant profile created. ID: [{}], Email: [{}], Org: [{}]",
             saved.getId(), saved.getEmail(), tenantId);
@@ -96,8 +110,15 @@ public class TenantProfileServiceImpl implements TenantProfileService {
             );
         }
 
+        TenantProfileAuditSnapshot before = TenantProfileAuditSnapshot.of(profile);
         tenantProfileMapper.updateEntityFromDto(requestDto, profile);
         TenantProfile saved = tenantProfileRepository.save(profile);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.TENANT_PROFILE, saved.getId(),
+            AuditActionType.UPDATE, before, TenantProfileAuditSnapshot.of(saved)
+        ));
 
         log.info("Tenant profile updated. ID: [{}]", saved.getId());
         return tenantProfileMapper.toResponseDto(saved);
@@ -109,7 +130,15 @@ public class TenantProfileServiceImpl implements TenantProfileService {
         UUID tenantId = TenantContext.getCurrentTenantId();
         log.info("Deleting tenant profile ID [{}] in org [{}]", id, tenantId);
         TenantProfile profile = resolveProfile(id, tenantId);
+        TenantProfileAuditSnapshot before = TenantProfileAuditSnapshot.of(profile);
         tenantProfileRepository.delete(profile);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.TENANT_PROFILE, id,
+            AuditActionType.DELETE, before, null
+        ));
+
         log.info("Tenant profile deleted. ID: [{}]", id);
     }
 
