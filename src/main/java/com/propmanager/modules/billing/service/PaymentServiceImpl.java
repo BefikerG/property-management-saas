@@ -11,6 +11,11 @@ import com.propmanager.modules.billing.entity.Payment;
 import com.propmanager.modules.billing.mapper.PaymentMapper;
 import com.propmanager.modules.billing.repository.InvoiceRepository;
 import com.propmanager.modules.billing.repository.PaymentRepository;
+import com.propmanager.core.audit.AuditActionType;
+import com.propmanager.core.audit.AuditActorResolver;
+import com.propmanager.core.audit.AuditDomainEvent;
+import com.propmanager.core.audit.AuditEntityType;
+import org.springframework.context.ApplicationEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,9 +53,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
-    private final PaymentRepository  paymentRepository;
-    private final InvoiceRepository  invoiceRepository;
-    private final PaymentMapper      paymentMapper;
+    private final PaymentRepository         paymentRepository;
+    private final InvoiceRepository         invoiceRepository;
+    private final PaymentMapper             paymentMapper;
+    private final ApplicationEventPublisher eventPublisher;
+    private final AuditActorResolver        auditActorResolver;
 
     @Override
     @Transactional
@@ -91,6 +98,14 @@ public class PaymentServiceImpl implements PaymentService {
         invoice.setAmountPaid(totalPaid);
         invoice.setStatus(calculateStatus(totalPaid, invoice.getAmountDue()));
         invoiceRepository.save(invoice);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.INVOICE, invoiceId,
+            AuditActionType.PAYMENT_LOGGED,
+            java.util.Map.of("invoiceId", invoiceId.toString()),
+            java.util.Map.of("paymentId", saved.getId().toString(), "amount", saved.getAmount().toString())
+        ));
 
         log.info("Payment logged. Invoice [{}] new status: [{}], " +
                  "amount_paid: [{}], amount_due: [{}]",
