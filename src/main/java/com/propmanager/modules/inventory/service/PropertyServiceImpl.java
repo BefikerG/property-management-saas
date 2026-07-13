@@ -5,6 +5,13 @@ import com.propmanager.core.exception.ResourceNotFoundException;
 import com.propmanager.core.tenant.TenantContext;
 import com.propmanager.modules.inventory.dto.*;
 import com.propmanager.modules.inventory.entity.*;
+import com.propmanager.core.audit.AuditActionType;
+import com.propmanager.core.audit.AuditActorResolver;
+import com.propmanager.core.audit.AuditDomainEvent;
+import com.propmanager.core.audit.AuditEntityType;
+import com.propmanager.core.audit.snapshot.PropertyAuditSnapshot;
+import com.propmanager.core.audit.snapshot.UnitAuditSnapshot;
+import org.springframework.context.ApplicationEventPublisher;
 import com.propmanager.modules.inventory.mapper.PropertyMapper;
 import com.propmanager.modules.inventory.mapper.PropertyStructureMapper;
 import com.propmanager.modules.inventory.mapper.UnitMapper;
@@ -30,6 +37,8 @@ public class PropertyServiceImpl implements PropertyService {
     private final PropertyMapper              propertyMapper;
     private final PropertyStructureMapper     structureMapper;
     private final UnitMapper                  unitMapper;
+    private final ApplicationEventPublisher   eventPublisher;
+    private final AuditActorResolver          auditActorResolver;
 
     // ── Property CRUD ────────────────────────────────────────────────
 
@@ -50,6 +59,12 @@ public class PropertyServiceImpl implements PropertyService {
         property.setTenantId(tenantId);
         Property saved = propertyRepository.save(property);
         propertyRepository.flush();
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.PROPERTY, saved.getId(),
+            AuditActionType.CREATE, null, PropertyAuditSnapshot.of(saved)
+        ));
 
         log.info("Property created. ID: [{}], Name: '{}', Org: [{}]",
             saved.getId(), saved.getName(), tenantId);
@@ -102,8 +117,15 @@ public class PropertyServiceImpl implements PropertyService {
             );
         }
 
+        PropertyAuditSnapshot before = PropertyAuditSnapshot.of(property);
         propertyMapper.updateEntityFromDto(requestDto, property);
         Property saved = propertyRepository.save(property);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.PROPERTY, saved.getId(),
+            AuditActionType.UPDATE, before, PropertyAuditSnapshot.of(saved)
+        ));
 
         log.info("Property updated. ID: [{}]", saved.getId());
         return propertyMapper.toResponseDto(saved);
@@ -116,7 +138,14 @@ public class PropertyServiceImpl implements PropertyService {
         log.info("Deleting property ID [{}] for org [{}]", id, tenantId);
 
         Property property = resolveProperty(id, tenantId);
+        PropertyAuditSnapshot before = PropertyAuditSnapshot.of(property);
         propertyRepository.delete(property);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.PROPERTY, id,
+            AuditActionType.DELETE, before, null
+        ));
 
         log.info("Property deleted. ID: [{}]", id);
     }
@@ -209,6 +238,13 @@ public class PropertyServiceImpl implements PropertyService {
 
         Unit saved = unitRepository.save(unit);
         unitRepository.flush();
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.UNIT, saved.getId(),
+            AuditActionType.CREATE, null, UnitAuditSnapshot.of(saved)
+        ));
+
         log.info("Unit created. ID: [{}], Number: '{}', Status: {}",
             saved.getId(), saved.getUnitNumber(), saved.getStatus());
         return unitMapper.toResponseDto(
@@ -255,10 +291,19 @@ public class PropertyServiceImpl implements PropertyService {
                 "No unit found with ID: " + unitId
             ));
 
+        UnitStatus previousStatus = unit.getStatus();
         validateStatusTransition(unit, requestDto.getStatus());
 
         unit.setStatus(requestDto.getStatus());
         Unit saved = unitRepository.save(unit);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.UNIT, saved.getId(),
+            AuditActionType.STATUS_CHANGE,
+            java.util.Map.of("status", previousStatus.name()),
+            java.util.Map.of("status", saved.getStatus().name())
+        ));
 
         log.info("Unit status updated. ID: [{}], New Status: [{}]",
             saved.getId(), saved.getStatus());
