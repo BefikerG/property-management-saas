@@ -11,6 +11,12 @@ import com.propmanager.modules.lease.dto.LeaseResponseDto;
 import com.propmanager.modules.lease.entity.Lease;
 import com.propmanager.modules.lease.entity.LeaseStatus;
 import com.propmanager.modules.lease.entity.TenantProfile;
+import com.propmanager.core.audit.AuditActionType;
+import com.propmanager.core.audit.AuditActorResolver;
+import com.propmanager.core.audit.AuditDomainEvent;
+import com.propmanager.core.audit.AuditEntityType;
+import com.propmanager.core.audit.snapshot.LeaseAuditSnapshot;
+import org.springframework.context.ApplicationEventPublisher;
 import com.propmanager.modules.lease.mapper.LeaseMapper;
 import com.propmanager.modules.lease.repository.LeaseRepository;
 import com.propmanager.modules.lease.repository.TenantProfileRepository;
@@ -47,10 +53,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LeaseServiceImpl implements LeaseService {
 
-    private final LeaseRepository         leaseRepository;
-    private final TenantProfileRepository tenantProfileRepository;
-    private final UnitRepository          unitRepository;
-    private final LeaseMapper             leaseMapper;
+    private final LeaseRepository           leaseRepository;
+    private final TenantProfileRepository   tenantProfileRepository;
+    private final UnitRepository            unitRepository;
+    private final LeaseMapper               leaseMapper;
+    private final ApplicationEventPublisher eventPublisher;
+    private final AuditActorResolver        auditActorResolver;
 
     // ── Create ───────────────────────────────────────────────────────
 
@@ -97,6 +105,13 @@ public class LeaseServiceImpl implements LeaseService {
 
         Lease saved = leaseRepository.save(lease);
         leaseRepository.flush();
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.LEASE, saved.getId(),
+            AuditActionType.CREATE, null, LeaseAuditSnapshot.of(saved)
+        ));
+
         log.info("Lease created. ID: [{}], Status: DRAFT, Unit: [{}]",
             saved.getId(), saved.getUnit().getId());
         return leaseMapper.toResponseDto(
@@ -186,10 +201,26 @@ public class LeaseServiceImpl implements LeaseService {
         lease.setStatus(LeaseStatus.ACTIVE);
 
         Unit unit = lease.getUnit();
+        UnitStatus previousUnitStatus = unit.getStatus();
         unit.setStatus(UnitStatus.OCCUPIED);
         unitRepository.save(unit);
 
         Lease saved = leaseRepository.save(lease);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.LEASE, saved.getId(),
+            AuditActionType.ACTIVATE, null, LeaseAuditSnapshot.of(saved)
+        ));
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.UNIT, unit.getId(),
+            AuditActionType.STATUS_CHANGE,
+            java.util.Map.of("status", previousUnitStatus.name()),
+            java.util.Map.of("status", unit.getStatus().name())
+        ));
+
         log.info("Lease activated. ID: [{}], Unit: [{}] → OCCUPIED", id, unit.getId());
         return leaseMapper.toResponseDto(saved);
     }
@@ -214,10 +245,26 @@ public class LeaseServiceImpl implements LeaseService {
         lease.setStatus(LeaseStatus.TERMINATED);
 
         Unit unit = lease.getUnit();
+        UnitStatus previousUnitStatus = unit.getStatus();
         unit.setStatus(UnitStatus.VACANT);
         unitRepository.save(unit);
 
         Lease saved = leaseRepository.save(lease);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.LEASE, saved.getId(),
+            AuditActionType.TERMINATE, null, LeaseAuditSnapshot.of(saved)
+        ));
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.UNIT, unit.getId(),
+            AuditActionType.STATUS_CHANGE,
+            java.util.Map.of("status", previousUnitStatus.name()),
+            java.util.Map.of("status", unit.getStatus().name())
+        ));
+
         log.info("Lease terminated. ID: [{}], Unit: [{}] → VACANT", id, unit.getId());
         return leaseMapper.toResponseDto(saved);
     }
@@ -242,10 +289,26 @@ public class LeaseServiceImpl implements LeaseService {
         lease.setStatus(LeaseStatus.EXPIRED);
 
         Unit unit = lease.getUnit();
+        UnitStatus previousUnitStatus = unit.getStatus();
         unit.setStatus(UnitStatus.VACANT);
         unitRepository.save(unit);
 
         Lease saved = leaseRepository.save(lease);
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.LEASE, saved.getId(),
+            AuditActionType.EXPIRE, null, LeaseAuditSnapshot.of(saved)
+        ));
+
+        eventPublisher.publishEvent(new AuditDomainEvent(
+            this, tenantId, auditActorResolver.resolveActorId(),
+            AuditEntityType.UNIT, unit.getId(),
+            AuditActionType.STATUS_CHANGE,
+            java.util.Map.of("status", previousUnitStatus.name()),
+            java.util.Map.of("status", unit.getStatus().name())
+        ));
+
         log.info("Lease expired. ID: [{}], Unit: [{}] → VACANT", id, unit.getId());
         return leaseMapper.toResponseDto(saved);
     }
