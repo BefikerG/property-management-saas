@@ -23,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -74,24 +77,21 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PropertyResponseDto> findAllProperties() {
+    public Page<PropertyResponseDto> findAllProperties(Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
-        log.debug("Fetching all properties for org [{}]", tenantId);
-        return propertyRepository.findAllByTenantId(tenantId)
-            .stream()
-            .map(propertyMapper::toResponseDto)
-            .toList();
+        log.debug("Fetching properties page [{}] for org [{}]",
+            pageable.getPageNumber(), tenantId);
+        return propertyRepository.findAllByTenantId(tenantId, pageable)
+            .map(propertyMapper::toResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<PropertyResponseDto> findAllPropertiesByCity(String city) {
+    public Page<PropertyResponseDto> findAllPropertiesByCity(String city, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
         log.debug("Fetching properties in city '{}' for org [{}]", city, tenantId);
-        return propertyRepository.findAllByTenantIdAndCity(tenantId, city)
-            .stream()
-            .map(propertyMapper::toResponseDto)
-            .toList();
+        return propertyRepository.findAllByTenantIdAndCity(tenantId, city, pageable)
+            .map(propertyMapper::toResponseDto);
     }
 
     @Override
@@ -189,13 +189,11 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PropertyStructureResponseDto> findAllStructures(UUID propertyId) {
+    public Page<PropertyStructureResponseDto> findAllStructures(UUID propertyId, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
         resolveProperty(propertyId, tenantId);
-        return structureRepository.findAllByPropertyIdAndTenantId(propertyId, tenantId)
-            .stream()
-            .map(structureMapper::toResponseDto)
-            .toList();
+        return structureRepository.findAllByPropertyIdAndTenantId(propertyId, tenantId, pageable)
+            .map(structureMapper::toResponseDto);
     }
 
     // ── Units ────────────────────────────────────────────────────────
@@ -253,13 +251,11 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UnitResponseDto> findAllUnits(UUID propertyId) {
+    public Page<UnitResponseDto> findAllUnits(UUID propertyId, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
         resolveProperty(propertyId, tenantId);
-        return unitRepository.findAllByPropertyIdAndTenantId(propertyId, tenantId)
-            .stream()
-            .map(unitMapper::toResponseDto)
-            .toList();
+        return unitRepository.findAllByPropertyIdAndTenantId(propertyId, tenantId, pageable)
+            .map(unitMapper::toResponseDto);
     }
 
     @Override

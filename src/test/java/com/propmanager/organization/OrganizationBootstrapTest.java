@@ -3,6 +3,7 @@ package com.propmanager.organization;
 import com.propmanager.base.BaseIntegrationTest;
 import com.propmanager.modules.organization.dto.OrganizationRequestDto;
 import com.propmanager.modules.organization.repository.StaffMemberRepository;
+import org.springframework.data.domain.Pageable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ class OrganizationBootstrapTest extends BaseIntegrationTest {
         String orgId = objectMapper.readTree(response).get("id").asText();
 
         long staffCount = staffMemberRepository.findAllByTenantId(
-            java.util.UUID.fromString(orgId)).size();
+            java.util.UUID.fromString(orgId), Pageable.unpaged()).getSize();
         assertThat(staffCount).isZero();
     }
 

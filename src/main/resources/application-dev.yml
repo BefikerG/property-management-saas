@@ -21,9 +21,18 @@ app:
       refresh-expiration-ms: 604800000 # 7 days in milliseconds
   billing:
     cron: "0 0 6 * * *"      # Daily at 06:00 — configurable per environment
+  pagination:
+    default-page-size: 20
+    max-page-size: 100
 
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId:-NO_CORR_ID}] %-5level %logger{36} - %msg%n"
   level:
+    com.propmanager: INFO
+    org.springframework.security: WARN
+    org.springframework.batch: WARN
+    liquibase: WARN
     org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
     # Suppresses the UserDetailsService config warning produced when a manual
     # AuthenticationProvider bean is declared in SecurityConfig. The warning is

@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,7 +21,7 @@ public interface TenantProfileRepository extends JpaRepository<TenantProfile, UU
     );
 
     @Query("SELECT t FROM TenantProfile t WHERE t.tenantId = :tenantId ORDER BY t.fullName ASC")
-    List<TenantProfile> findAllByTenantId(@Param("tenantId") UUID tenantId);
+    Page<TenantProfile> findAllByTenantId(@Param("tenantId") UUID tenantId, Pageable pageable);
 
     @Query("""
         SELECT t FROM TenantProfile t
@@ -27,9 +30,10 @@ public interface TenantProfileRepository extends JpaRepository<TenantProfile, UU
            OR LOWER(t.email) LIKE LOWER(CONCAT('%', :query, '%')))
         ORDER BY t.fullName ASC
         """)
-    List<TenantProfile> searchByTenantId(
+    Page<TenantProfile> searchByTenantId(
         @Param("tenantId") UUID   tenantId,
-        @Param("query")    String query
+        @Param("query")    String query,
+        Pageable                  pageable
     );
 
     @Query("SELECT COUNT(t) > 0 FROM TenantProfile t WHERE t.email = :email AND t.tenantId = :tenantId")

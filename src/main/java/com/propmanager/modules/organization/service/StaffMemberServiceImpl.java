@@ -22,6 +22,9 @@ import com.propmanager.core.audit.AuditEntityType;
 import com.propmanager.core.audit.snapshot.StaffMemberAuditSnapshot;
 import org.springframework.context.ApplicationEventPublisher;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -117,15 +120,13 @@ public class StaffMemberServiceImpl implements StaffMemberService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StaffMemberResponseDto> findAll() {
+    public Page<StaffMemberResponseDto> findAll(Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
 
         log.debug("Fetching all staff members for org [{}]", tenantId);
 
-        return staffMemberRepository.findAllByTenantId(tenantId)
-            .stream()
-            .map(staffMemberMapper::toResponseDto)
-            .toList();
+        return staffMemberRepository.findAllByTenantId(tenantId, pageable)
+            .map(staffMemberMapper::toResponseDto);
     }
 
     @Override

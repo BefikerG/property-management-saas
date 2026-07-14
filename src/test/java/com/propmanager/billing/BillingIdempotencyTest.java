@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -149,10 +150,10 @@ class BillingIdempotencyTest extends BaseIntegrationTest {
 
         List<Invoice> alphaInvoices = invoiceRepository
             .findAllByLeaseIdAndTenantId(
-                activeLeaseAlpha.getId(), orgAlpha.getId());
+                activeLeaseAlpha.getId(), orgAlpha.getId(), Pageable.unpaged()).getContent();
         List<Invoice> betaInvoices = invoiceRepository
             .findAllByLeaseIdAndTenantId(
-                activeLeaseBeta.getId(), orgBeta.getId());
+                activeLeaseBeta.getId(), orgBeta.getId(), Pageable.unpaged()).getContent();
 
         assertThat(alphaInvoices).hasSize(1);
         assertThat(betaInvoices).hasSize(1);
@@ -167,7 +168,7 @@ class BillingIdempotencyTest extends BaseIntegrationTest {
 
         List<Invoice> alphaInvoices = invoiceRepository
             .findAllByLeaseIdAndTenantId(
-                activeLeaseAlpha.getId(), orgAlpha.getId());
+                activeLeaseAlpha.getId(), orgAlpha.getId(), Pageable.unpaged()).getContent();
 
         assertThat(alphaInvoices).hasSize(1);
     }
@@ -179,8 +180,8 @@ class BillingIdempotencyTest extends BaseIntegrationTest {
 
         Invoice invoice = invoiceRepository
             .findAllByLeaseIdAndTenantId(
-                activeLeaseAlpha.getId(), orgAlpha.getId())
-            .get(0);
+                activeLeaseAlpha.getId(), orgAlpha.getId(), Pageable.unpaged())
+            .getContent().get(0);
 
         assertThat(invoice.getAmountDue().compareTo(RENT_AMOUNT))
             .as("amount_due must equal monthly_rent exactly (BigDecimal comparison)")
@@ -194,8 +195,8 @@ class BillingIdempotencyTest extends BaseIntegrationTest {
 
         Invoice invoice = invoiceRepository
             .findAllByLeaseIdAndTenantId(
-                activeLeaseAlpha.getId(), orgAlpha.getId())
-            .get(0);
+                activeLeaseAlpha.getId(), orgAlpha.getId(), Pageable.unpaged())
+            .getContent().get(0);
 
         assertThat(invoice.getStatus()).isEqualTo(InvoiceStatus.UNPAID);
         assertThat(invoice.getAmountPaid().compareTo(BigDecimal.ZERO)).isZero();
@@ -208,8 +209,8 @@ class BillingIdempotencyTest extends BaseIntegrationTest {
 
         Invoice invoice = invoiceRepository
             .findAllByLeaseIdAndTenantId(
-                activeLeaseAlpha.getId(), orgAlpha.getId())
-            .get(0);
+                activeLeaseAlpha.getId(), orgAlpha.getId(), Pageable.unpaged())
+            .getContent().get(0);
 
         assertThat(invoice.getBillingPeriod()).isEqualTo(BILLING_PERIOD);
     }
@@ -221,13 +222,13 @@ class BillingIdempotencyTest extends BaseIntegrationTest {
 
         // Alpha can see its own invoice
         List<Invoice> alphaCanSee = invoiceRepository
-            .findAllByTenantId(orgAlpha.getId());
+            .findAllByTenantId(orgAlpha.getId(), Pageable.unpaged()).getContent();
         assertThat(alphaCanSee)
             .noneMatch(i -> i.getTenantId().equals(orgBeta.getId()));
 
         // Beta can see its own invoice
         List<Invoice> betaCanSee = invoiceRepository
-            .findAllByTenantId(orgBeta.getId());
+            .findAllByTenantId(orgBeta.getId(), Pageable.unpaged()).getContent();
         assertThat(betaCanSee)
             .noneMatch(i -> i.getTenantId().equals(orgAlpha.getId()));
     }
