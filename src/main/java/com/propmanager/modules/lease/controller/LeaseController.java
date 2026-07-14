@@ -14,6 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -74,21 +78,27 @@ public class LeaseController {
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping
-    public ResponseEntity<List<LeaseResponseDto>> getAll(
+    public ResponseEntity<Page<LeaseResponseDto>> getAll(
         @RequestParam(required = false) LeaseStatus status,
         @RequestParam(required = false) UUID        unitId,
-        @RequestParam(required = false) UUID        tenantProfileId
+        @RequestParam(required = false) UUID        tenantProfileId,
+        @RequestParam(defaultValue = "0")  int    page,
+        @RequestParam(defaultValue = "20") int    size
     ) {
+        int safeSize = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(
+            page, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+
         if (status != null) {
-            return ResponseEntity.ok(leaseService.findAllByStatus(status));
+            return ResponseEntity.ok(leaseService.findAllByStatus(status, pageable));
         }
         if (unitId != null) {
-            return ResponseEntity.ok(leaseService.findAllByUnit(unitId));
+            return ResponseEntity.ok(leaseService.findAllByUnit(unitId, pageable));
         }
         if (tenantProfileId != null) {
-            return ResponseEntity.ok(leaseService.findAllByTenantProfile(tenantProfileId));
+            return ResponseEntity.ok(leaseService.findAllByTenantProfile(tenantProfileId, pageable));
         }
-        return ResponseEntity.ok(leaseService.findAll());
+        return ResponseEntity.ok(leaseService.findAll(pageable));
     }
 
     @Operation(summary = "Activate a lease",

@@ -117,8 +117,8 @@ class MultiTenantIsolationTest extends BaseIntegrationTest {
                 .header("Authorization", bearerOf(tokenAlphaAdmin))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[?(@.name == 'Beta Tower')]").doesNotExist())
-            .andExpect(jsonPath("$[?(@.name == 'Alpha Tower')]").exists());
+            .andExpect(jsonPath("$.content[?(@.name == 'Beta Tower')]").doesNotExist())
+            .andExpect(jsonPath("$.content[?(@.name == 'Alpha Tower')]").exists());
     }
 
     @Test
@@ -128,8 +128,8 @@ class MultiTenantIsolationTest extends BaseIntegrationTest {
                 .header("Authorization", bearerOf(tokenBetaAdmin))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[?(@.name == 'Alpha Tower')]").doesNotExist())
-            .andExpect(jsonPath("$[?(@.name == 'Beta Tower')]").exists());
+            .andExpect(jsonPath("$.content[?(@.name == 'Alpha Tower')]").doesNotExist())
+            .andExpect(jsonPath("$.content[?(@.name == 'Beta Tower')]").exists());
     }
 
     @Test
@@ -149,8 +149,8 @@ class MultiTenantIsolationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/tenant-profiles")
                 .header("Authorization", bearerOf(tokenAlphaAdmin)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[?(@.email == 'dawit@example.com')]").doesNotExist())
-            .andExpect(jsonPath("$[?(@.email == 'tigist@example.com')]").exists());
+            .andExpect(jsonPath("$.content[?(@.email == 'dawit@example.com')]").doesNotExist())
+            .andExpect(jsonPath("$.content[?(@.email == 'tigist@example.com')]").exists());
     }
 
     @Test
@@ -170,7 +170,7 @@ class MultiTenantIsolationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/leases")
                 .header("Authorization", bearerOf(tokenAlphaAdmin)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[?(@.tenantId == '" + orgBeta.getId() + "')]")
+            .andExpect(jsonPath("$.content[?(@.tenantId == '" + orgBeta.getId() + "')]")
                 .doesNotExist());
     }
 
@@ -191,8 +191,8 @@ class MultiTenantIsolationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/staff-members")
                 .header("Authorization", bearerOf(tokenAlphaAdmin)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[?(@.email == 'admin@beta.com')]").doesNotExist())
-            .andExpect(jsonPath("$[?(@.email == 'admin@alpha.com')]").exists());
+            .andExpect(jsonPath("$.content[?(@.email == 'admin@beta.com')]").doesNotExist())
+            .andExpect(jsonPath("$.content[?(@.email == 'admin@alpha.com')]").exists());
     }
 
     // ── Role-Based Isolation (Viewer cannot mutate) ────────────────────
@@ -203,7 +203,7 @@ class MultiTenantIsolationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/properties")
                 .header("Authorization", bearerOf(tokenAlphaViewer)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[?(@.name == 'Alpha Tower')]").exists());
+            .andExpect(jsonPath("$.content[?(@.name == 'Alpha Tower')]").exists());
     }
 
     @Test
@@ -212,6 +212,6 @@ class MultiTenantIsolationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/properties")
                 .header("Authorization", bearerOf(tokenAlphaViewer)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[?(@.name == 'Beta Tower')]").doesNotExist());
+            .andExpect(jsonPath("$.content[?(@.name == 'Beta Tower')]").doesNotExist());
     }
 }

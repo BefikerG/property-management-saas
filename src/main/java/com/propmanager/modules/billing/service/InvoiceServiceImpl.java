@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -38,26 +41,26 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InvoiceResponseDto> findAll() {
+    public Page<InvoiceResponseDto> findAll(Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
         log.debug("Fetching all invoices for org [{}]", tenantId);
-        return invoiceRepository.findAllByTenantId(tenantId)
-            .stream().map(invoiceMapper::toResponseDto).toList();
+        return invoiceRepository.findAllByTenantId(tenantId, pageable)
+            .map(invoiceMapper::toResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<InvoiceResponseDto> findAllByStatus(InvoiceStatus status) {
+    public Page<InvoiceResponseDto> findAllByStatus(InvoiceStatus status, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
-        return invoiceRepository.findAllByTenantIdAndStatus(tenantId, status)
-            .stream().map(invoiceMapper::toResponseDto).toList();
+        return invoiceRepository.findAllByTenantIdAndStatus(tenantId, status, pageable)
+            .map(invoiceMapper::toResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<InvoiceResponseDto> findAllByLease(UUID leaseId) {
+    public Page<InvoiceResponseDto> findAllByLease(UUID leaseId, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
-        return invoiceRepository.findAllByLeaseIdAndTenantId(leaseId, tenantId)
-            .stream().map(invoiceMapper::toResponseDto).toList();
+        return invoiceRepository.findAllByLeaseIdAndTenantId(leaseId, tenantId, pageable)
+            .map(invoiceMapper::toResponseDto);
     }
 }
