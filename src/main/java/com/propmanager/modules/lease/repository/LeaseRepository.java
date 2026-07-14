@@ -6,6 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,7 +26,7 @@ public interface LeaseRepository extends JpaRepository<Lease, UUID> {
             WHERE l.tenantId = :tenantId
             ORDER BY l.createdAt DESC
             """)
-    List<Lease> findAllByTenantId(@Param("tenantId") UUID tenantId);
+    Page<Lease> findAllByTenantId(@Param("tenantId") UUID tenantId, Pageable pageable);
 
     @Query("""
             SELECT l FROM Lease l
@@ -30,9 +34,10 @@ public interface LeaseRepository extends JpaRepository<Lease, UUID> {
               AND l.status = :status
             ORDER BY l.createdAt DESC
             """)
-    List<Lease> findAllByTenantIdAndStatus(
+    Page<Lease> findAllByTenantIdAndStatus(
             @Param("tenantId") UUID tenantId,
-            @Param("status") LeaseStatus status);
+            @Param("status") LeaseStatus status,
+            Pageable pageable);
 
     @Query("""
             SELECT l FROM Lease l
@@ -40,9 +45,10 @@ public interface LeaseRepository extends JpaRepository<Lease, UUID> {
               AND l.tenantId = :tenantId
             ORDER BY l.createdAt DESC
             """)
-    List<Lease> findAllByUnitIdAndTenantId(
+    Page<Lease> findAllByUnitIdAndTenantId(
             @Param("unitId") UUID unitId,
-            @Param("tenantId") UUID tenantId);
+            @Param("tenantId") UUID tenantId,
+            Pageable pageable);
 
     @Query("""
             SELECT l FROM Lease l
@@ -50,9 +56,10 @@ public interface LeaseRepository extends JpaRepository<Lease, UUID> {
               AND l.tenantId = :tenantId
             ORDER BY l.createdAt DESC
             """)
-    List<Lease> findAllByTenantProfileIdAndTenantId(
+    Page<Lease> findAllByTenantProfileIdAndTenantId(
             @Param("tenantProfileId") UUID tenantProfileId,
-            @Param("tenantId") UUID tenantId);
+            @Param("tenantId") UUID tenantId,
+            Pageable pageable);
 
     /**
      * ⚠️ CROSS-TENANT QUERY — FOR BILLING ENGINE USE ONLY.
@@ -81,4 +88,19 @@ public interface LeaseRepository extends JpaRepository<Lease, UUID> {
     boolean existsActiveLeasForUnit(
             @Param("unitId") UUID unitId,
             @Param("tenantId") UUID tenantId);
+
+    /**
+     * Finds all ACTIVE leases whose end_date is strictly before the
+     * given date. Used exclusively by LeaseExpiryJob.
+     *
+     * ⚠️  CROSS-TENANT QUERY — FOR LEASE EXPIRY JOB USE ONLY.
+     * Returns leases across ALL organizations.
+     * Must NEVER be called from any tenant-scoped business service.
+     */
+    @Query("""
+        SELECT l FROM Lease l
+        WHERE l.status = 'ACTIVE'
+          AND l.endDate < :today
+        """)
+    List<Lease> findAllActiveWithEndDateBefore(@Param("today") LocalDate today);
 }

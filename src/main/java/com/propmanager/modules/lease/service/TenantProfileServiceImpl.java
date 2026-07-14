@@ -19,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -73,24 +76,20 @@ public class TenantProfileServiceImpl implements TenantProfileService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TenantProfileResponseDto> findAll() {
+    public Page<TenantProfileResponseDto> findAll(Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
         log.debug("Fetching all tenant profiles for org [{}]", tenantId);
-        return tenantProfileRepository.findAllByTenantId(tenantId)
-            .stream()
-            .map(tenantProfileMapper::toResponseDto)
-            .toList();
+        return tenantProfileRepository.findAllByTenantId(tenantId, pageable)
+            .map(tenantProfileMapper::toResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<TenantProfileResponseDto> search(String query) {
+    public Page<TenantProfileResponseDto> search(String query, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
         log.debug("Searching tenant profiles with query '{}' in org [{}]", query, tenantId);
-        return tenantProfileRepository.searchByTenantId(tenantId, query)
-            .stream()
-            .map(tenantProfileMapper::toResponseDto)
-            .toList();
+        return tenantProfileRepository.searchByTenantId(tenantId, query, pageable)
+            .map(tenantProfileMapper::toResponseDto);
     }
 
     @Override

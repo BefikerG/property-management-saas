@@ -1,34 +1,132 @@
 databaseChangeLog:
-  - include:
-      file: db/changelog/migrations/V001__create_organizations_table.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V002__create_staff_members_table.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V003__create_properties_table.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V004__create_property_structures_table.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V005__create_units_table.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V006__create_tenant_profiles_table.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V007__create_leases_table.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V008__create_invoices_table.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V009__create_payments_table.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V010__create_spring_batch_tables.sql
-      relativeToChangelogFile: false
-  - include:
-      file: db/changelog/migrations/V011__create_system_audit_logs_table.sql
-      relativeToChangelogFile: false
+  - changeSet:
+      id: V001__create_organizations_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V001__create_organizations_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V001__rollback_organizations.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V002__create_staff_members_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V002__create_staff_members_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V002__rollback_staff_members.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V003__create_properties_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V003__create_properties_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V003__rollback_properties.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V004__create_property_structures_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V004__create_property_structures_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V004__rollback_property_structures.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V005__create_units_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V005__create_units_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V005__rollback_units.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V006__create_tenant_profiles_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V006__create_tenant_profiles_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V006__rollback_tenant_profiles.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V007__create_leases_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V007__create_leases_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V007__rollback_leases.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V008__create_invoices_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V008__create_invoices_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V008__rollback_invoices.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V009__create_payments_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V009__create_payments_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V009__rollback_payments.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V010__create_spring_batch_tables
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V010__create_spring_batch_tables.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V010__rollback_spring_batch.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: V011__create_system_audit_logs_table
+      author: propmanager
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/V011__create_system_audit_logs_table.sql
+            relativeToChangelogFile: false
+      rollback:
+        - sqlFile:
+            path: db/changelog/rollbacks/V011__rollback_audit_logs.sql
+            relativeToChangelogFile: false

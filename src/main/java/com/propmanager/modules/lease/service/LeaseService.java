@@ -5,6 +5,9 @@ import com.propmanager.modules.lease.dto.LeaseResponseDto;
 import com.propmanager.modules.lease.entity.LeaseStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -17,16 +20,16 @@ public interface LeaseService {
     LeaseResponseDto findById(UUID id);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
-    List<LeaseResponseDto> findAll();
+    Page<LeaseResponseDto> findAll(Pageable pageable);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
-    List<LeaseResponseDto> findAllByStatus(LeaseStatus status);
+    Page<LeaseResponseDto> findAllByStatus(LeaseStatus status, Pageable pageable);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
-    List<LeaseResponseDto> findAllByUnit(UUID unitId);
+    Page<LeaseResponseDto> findAllByUnit(UUID unitId, Pageable pageable);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
-    List<LeaseResponseDto> findAllByTenantProfile(UUID tenantProfileId);
+    Page<LeaseResponseDto> findAllByTenantProfile(UUID tenantProfileId, Pageable pageable);
 
     /**
      * Activates a DRAFT or PENDING lease.

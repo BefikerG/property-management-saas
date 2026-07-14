@@ -12,6 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -56,13 +60,20 @@ public class PropertyController {
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping
-    public ResponseEntity<List<PropertyResponseDto>> getAllProperties(
-        @RequestParam(required = false) String city
+    public ResponseEntity<Page<PropertyResponseDto>> getAllProperties(
+        @RequestParam(required = false) String city,
+        @RequestParam(defaultValue = "0")  int    page,
+        @RequestParam(defaultValue = "20") int    size
     ) {
+        int safeSize = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(
+            page, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+
         if (city != null && !city.isBlank()) {
-            return ResponseEntity.ok(propertyService.findAllPropertiesByCity(city));
+            return ResponseEntity.ok(
+                propertyService.findAllPropertiesByCity(city, pageable));
         }
-        return ResponseEntity.ok(propertyService.findAllProperties());
+        return ResponseEntity.ok(propertyService.findAllProperties(pageable));
     }
 
     @Operation(summary = "Get property by ID",
@@ -148,10 +159,15 @@ public class PropertyController {
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping("/{propertyId}/structures")
-    public ResponseEntity<List<PropertyStructureResponseDto>> getAllStructures(
-        @PathVariable UUID propertyId
+    public ResponseEntity<Page<PropertyStructureResponseDto>> getAllStructures(
+        @PathVariable UUID propertyId,
+        @RequestParam(defaultValue = "0")  int    page,
+        @RequestParam(defaultValue = "20") int    size
     ) {
-        return ResponseEntity.ok(propertyService.findAllStructures(propertyId));
+        int safeSize = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(
+            page, safeSize, Sort.by(Sort.Direction.ASC, "ordinal"));
+        return ResponseEntity.ok(propertyService.findAllStructures(propertyId, pageable));
     }
 
     // ── Units ────────────────────────────────────────────────────────
@@ -189,8 +205,15 @@ public class PropertyController {
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping("/{propertyId}/units")
-    public ResponseEntity<List<UnitResponseDto>> getAllUnits(@PathVariable UUID propertyId) {
-        return ResponseEntity.ok(propertyService.findAllUnits(propertyId));
+    public ResponseEntity<Page<UnitResponseDto>> getAllUnits(
+        @PathVariable UUID propertyId,
+        @RequestParam(defaultValue = "0")  int    page,
+        @RequestParam(defaultValue = "20") int    size
+    ) {
+        int safeSize = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(
+            page, safeSize, Sort.by(Sort.Direction.ASC, "unitNumber"));
+        return ResponseEntity.ok(propertyService.findAllUnits(propertyId, pageable));
     }
 
     @Operation(summary = "Get unit by ID",

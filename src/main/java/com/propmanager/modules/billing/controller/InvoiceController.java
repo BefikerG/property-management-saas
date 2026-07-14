@@ -16,6 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -54,17 +58,23 @@ public class InvoiceController {
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping
-    public ResponseEntity<List<InvoiceResponseDto>> getAll(
+    public ResponseEntity<Page<InvoiceResponseDto>> getAll(
         @RequestParam(required = false) InvoiceStatus status,
-        @RequestParam(required = false) UUID          leaseId
+        @RequestParam(required = false) UUID          leaseId,
+        @RequestParam(defaultValue = "0")  int    page,
+        @RequestParam(defaultValue = "20") int    size
     ) {
+        int safeSize = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(
+            page, safeSize, Sort.by(Sort.Direction.DESC, "issuedAt"));
+
         if (status != null) {
-            return ResponseEntity.ok(invoiceService.findAllByStatus(status));
+            return ResponseEntity.ok(invoiceService.findAllByStatus(status, pageable));
         }
         if (leaseId != null) {
-            return ResponseEntity.ok(invoiceService.findAllByLease(leaseId));
+            return ResponseEntity.ok(invoiceService.findAllByLease(leaseId, pageable));
         }
-        return ResponseEntity.ok(invoiceService.findAll());
+        return ResponseEntity.ok(invoiceService.findAll(pageable));
     }
 
     @Operation(summary = "Log a payment",
@@ -102,9 +112,14 @@ public class InvoiceController {
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping("/{invoiceId}/payments")
-    public ResponseEntity<List<PaymentResponseDto>> getPayments(
-        @PathVariable UUID invoiceId
+    public ResponseEntity<Page<PaymentResponseDto>> getPayments(
+        @PathVariable UUID invoiceId,
+        @RequestParam(defaultValue = "0")  int    page,
+        @RequestParam(defaultValue = "20") int    size
     ) {
-        return ResponseEntity.ok(paymentService.findAllByInvoice(invoiceId));
+        int safeSize = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(
+            page, safeSize, Sort.by(Sort.Direction.DESC, "paidAt"));
+        return ResponseEntity.ok(paymentService.findAllByInvoice(invoiceId, pageable));
     }
 }

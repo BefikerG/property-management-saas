@@ -13,6 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -71,13 +75,18 @@ public class TenantProfileController {
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping
-    public ResponseEntity<List<TenantProfileResponseDto>> getAll(
-        @RequestParam(required = false) String query
+    public ResponseEntity<Page<TenantProfileResponseDto>> getAll(
+        @RequestParam(required = false) String query,
+        @RequestParam(defaultValue = "0")  int    page,
+        @RequestParam(defaultValue = "20") int    size
     ) {
+        int safeSize = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(
+            page, safeSize, Sort.by(Sort.Direction.ASC, "fullName"));
         if (query != null && !query.isBlank()) {
-            return ResponseEntity.ok(tenantProfileService.search(query));
+            return ResponseEntity.ok(tenantProfileService.search(query, pageable));
         }
-        return ResponseEntity.ok(tenantProfileService.findAll());
+        return ResponseEntity.ok(tenantProfileService.findAll(pageable));
     }
 
     @Operation(summary = "Replace a tenant profile",
