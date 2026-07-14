@@ -3,6 +3,9 @@ package com.propmanager.modules.inventory.service;
 import com.propmanager.modules.inventory.dto.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -12,10 +15,10 @@ public interface PropertyService {
     PropertyResponseDto createProperty(PropertyRequestDto requestDto);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
-    List<PropertyResponseDto> findAllProperties();
+    Page<PropertyResponseDto> findAllProperties(Pageable pageable);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
-    List<PropertyResponseDto> findAllPropertiesByCity(String city);
+    Page<PropertyResponseDto> findAllPropertiesByCity(String city, Pageable pageable);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
     PropertyResponseDto findPropertyById(UUID id);
@@ -30,13 +33,13 @@ public interface PropertyService {
     PropertyStructureResponseDto addStructure(UUID propertyId, PropertyStructureRequestDto requestDto);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
-    List<PropertyStructureResponseDto> findAllStructures(UUID propertyId);
+    Page<PropertyStructureResponseDto> findAllStructures(UUID propertyId, Pageable pageable);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER')")
     UnitResponseDto addUnit(UUID propertyId, UnitRequestDto requestDto);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
-    List<UnitResponseDto> findAllUnits(UUID propertyId);
+    Page<UnitResponseDto> findAllUnits(UUID propertyId, Pageable pageable);
 
     @PreAuthorize("hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_PROPERTY_MANAGER', 'ROLE_VIEWER')")
     UnitResponseDto findUnitById(UUID propertyId, UUID unitId);

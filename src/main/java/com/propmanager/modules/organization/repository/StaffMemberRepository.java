@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,7 +68,10 @@ public interface StaffMemberRepository extends JpaRepository<StaffMember, UUID> 
      * @return list of staff members in the organization
      */
     @Query("SELECT s FROM StaffMember s WHERE s.tenantId = :tenantId ORDER BY s.createdAt DESC")
-    List<StaffMember> findAllByTenantId(@Param("tenantId") UUID tenantId);
+    Page<StaffMember> findAllByTenantId(
+        @Param("tenantId") UUID tenantId,
+        Pageable pageable
+    );
 
     /**
      * Checks whether a staff member with the given email already exists

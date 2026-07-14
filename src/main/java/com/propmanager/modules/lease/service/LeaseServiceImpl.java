@@ -25,6 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -129,34 +132,34 @@ public class LeaseServiceImpl implements LeaseService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<LeaseResponseDto> findAll() {
+    public Page<LeaseResponseDto> findAll(Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
-        return leaseRepository.findAllByTenantId(tenantId)
-            .stream().map(leaseMapper::toResponseDto).toList();
+        return leaseRepository.findAllByTenantId(tenantId, pageable)
+            .map(leaseMapper::toResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<LeaseResponseDto> findAllByStatus(LeaseStatus status) {
+    public Page<LeaseResponseDto> findAllByStatus(LeaseStatus status, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
-        return leaseRepository.findAllByTenantIdAndStatus(tenantId, status)
-            .stream().map(leaseMapper::toResponseDto).toList();
+        return leaseRepository.findAllByTenantIdAndStatus(tenantId, status, pageable)
+            .map(leaseMapper::toResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<LeaseResponseDto> findAllByUnit(UUID unitId) {
+    public Page<LeaseResponseDto> findAllByUnit(UUID unitId, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
-        return leaseRepository.findAllByUnitIdAndTenantId(unitId, tenantId)
-            .stream().map(leaseMapper::toResponseDto).toList();
+        return leaseRepository.findAllByUnitIdAndTenantId(unitId, tenantId, pageable)
+            .map(leaseMapper::toResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<LeaseResponseDto> findAllByTenantProfile(UUID tenantProfileId) {
+    public Page<LeaseResponseDto> findAllByTenantProfile(UUID tenantProfileId, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
-        return leaseRepository.findAllByTenantProfileIdAndTenantId(tenantProfileId, tenantId)
-            .stream().map(leaseMapper::toResponseDto).toList();
+        return leaseRepository.findAllByTenantProfileIdAndTenantId(tenantProfileId, tenantId, pageable)
+            .map(leaseMapper::toResponseDto);
     }
 
     // ── Lifecycle Transitions ─────────────────────────────────────────

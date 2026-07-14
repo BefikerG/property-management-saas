@@ -21,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -117,7 +120,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PaymentResponseDto> findAllByInvoice(UUID invoiceId) {
+    public Page<PaymentResponseDto> findAllByInvoice(UUID invoiceId, Pageable pageable) {
         UUID tenantId = TenantContext.getCurrentTenantId();
 
         invoiceRepository.findByIdAndTenantId(invoiceId, tenantId)
@@ -126,8 +129,8 @@ public class PaymentServiceImpl implements PaymentService {
                 "No invoice found with ID: " + invoiceId
             ));
 
-        return paymentRepository.findAllByInvoiceIdAndTenantId(invoiceId, tenantId)
-            .stream().map(paymentMapper::toResponseDto).toList();
+        return paymentRepository.findAllByInvoiceIdAndTenantId(invoiceId, tenantId, pageable)
+            .map(paymentMapper::toResponseDto);
     }
 
     // ── Private Helpers ──────────────────────────────────────────────

@@ -13,6 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -101,8 +105,14 @@ public class StaffMemberController {
         @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping
-    public ResponseEntity<List<StaffMemberResponseDto>> getAll() {
-        return ResponseEntity.ok(staffMemberService.findAll());
+    public ResponseEntity<Page<StaffMemberResponseDto>> getAll(
+        @RequestParam(defaultValue = "0")  int    page,
+        @RequestParam(defaultValue = "20") int    size
+    ) {
+        int safeSize = Math.min(size, 100);
+        PageRequest pageable = PageRequest.of(
+            page, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return ResponseEntity.ok(staffMemberService.findAll(pageable));
     }
 
     @Operation(
