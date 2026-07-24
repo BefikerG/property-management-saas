@@ -17,7 +17,10 @@
 | `v0.4.1` | ✅ Released | Pilot Feedback Patch |
 | `v0.5.0` | ✅ Released | Automated Testing & Audit Ledger |
 | `v0.6.0` | ✅ Released | Production Hardening — Rate Limiting, Pagination, Correlation ID Tracing, Lease Expiry Job |
+<<<<<<< HEAD
 | `v0.7.0` | 🚧 In Progress | Next.js Frontend Client & API Integration |
+=======
+>>>>>>> main
 
 ---
 
@@ -84,6 +87,7 @@ Terminate Lease
 | Database | PostgreSQL | 16 |
 | Database Migration | Liquibase | 4.31.1 |
 | Batch Processing | Spring Batch | 3.x |
+| Rate Limiting | Bucket4j | 8.10.1 |
 | Object Mapping | MapStruct | 1.6.3 |
 | API Documentation | SpringDoc OpenAPI | 2.8.5 |
 | Build Tool | Maven | 3.9+ |
@@ -433,6 +437,66 @@ Authorization: Bearer <accessToken>
 
 ---
 
+# Production Hardening (v0.6.0)
+
+## Rate Limiting
+
+Authentication endpoints are protected against brute-force attacks using an in-process Bucket4j token bucket.
+
+| Setting | Value |
+|---------|-------|
+| Protected paths | `/api/v1/auth/**` |
+| Limit | 10 requests / minute / IP |
+| Response on breach | `HTTP 429 Too Many Requests` |
+| Headers | `Retry-After`, `X-RateLimit-Remaining` |
+| Proxy-aware | Yes — reads `X-Forwarded-For` |
+
+---
+
+## Pagination
+
+All list endpoints are paginated. Unbounded queries are not permitted.
+
+| Setting | Value |
+|---------|-------|
+| Default page size | 20 |
+| Maximum page size | 100 |
+| Query params | `?page=0&size=20` |
+| Response envelope | Spring `Page<T>` (`content`, `totalElements`, `totalPages`, `first`, `last`) |
+
+Modules covered: Properties, Staff Members, Tenant Profiles, Leases, Invoices, Payments.
+
+---
+
+## Correlation ID Tracing
+
+Every HTTP request is assigned a unique correlation ID.
+
+- Sourced from the client's `X-Correlation-ID` header if provided, otherwise generated as a UUID.
+- Bound to the SLF4J MDC for the full duration of the request thread.
+- Echoed back in the response's `X-Correlation-ID` header.
+- Printed on every log line: `[%X{correlationId:-NO_CORR_ID}]`.
+
+To trace a full request in logs:
+```bash
+grep "a3f9b2c1-..." application.log
+```
+
+---
+
+## Scheduled Lease Expiry
+
+A nightly cron job automatically expires overdue leases.
+
+| Setting | Value |
+|---------|-------|
+| Schedule | `0 0 2 * * *` (02:00 daily) |
+| Scope | Cross-tenant — all organizations |
+| Action | Lease → `EXPIRED`, Unit → `VACANT` |
+| Error isolation | One failing lease never blocks others |
+
+---
+
 # Unit State Machine
 
 ```text
@@ -469,6 +533,7 @@ Invoice status is calculated automatically using `BigDecimal`.
 
 # Database Migrations
 
+<<<<<<< HEAD
 | Version | Description |
 |---------|-------------|
 | V001 | Organizations |
@@ -482,8 +547,24 @@ Invoice status is calculated automatically using `BigDecimal`.
 | V009 | Payments |
 | V010 | Spring Batch Schema |
 | V011 | System Audit Logs |
+=======
+| Version | Description | Rollback |
+|---------|-------------|----------|
+| V001 | Organizations | ✅ |
+| V002 | Staff Members | ✅ |
+| V003 | Properties | ✅ |
+| V004 | Property Structures | ✅ |
+| V005 | Units | ✅ |
+| V006 | Tenant Profiles | ✅ |
+| V007 | Leases | ✅ |
+| V008 | Invoices | ✅ |
+| V009 | Payments | ✅ |
+| V010 | Spring Batch Schema | ✅ |
+| V011 | System Audit Logs | ✅ |
+>>>>>>> main
 
 Liquibase automatically applies all migrations during startup.
+All migrations have companion rollback scripts in `db/changelog/rollbacks/`.
 
 ---
 
@@ -498,7 +579,10 @@ Liquibase automatically applies all migrations during startup.
 | v0.4.1 | Pilot Feedback | ✅ |
 | v0.5.0 | Automated Testing & Audit Ledger | ✅ |
 | v0.6.0 | Production Hardening | ✅ |
+<<<<<<< HEAD
 | v0.7.0 | Next.js Frontend Client & API Integration | 🚧 |
+=======
+>>>>>>> main
 | v1.0.0 | MVP General Availability | 📅 Planned |
 
 ---
