@@ -15,8 +15,9 @@
 | `v0.3.0` | ✅ Released | Tenant & Lease Management |
 | `v0.4.0` | ✅ Released | Automated Billing Engine |
 | `v0.4.1` | ✅ Released | Pilot Feedback Patch |
-| `v0.5.0` | ✅ Released | Automated Testing, Audit Ledger, Production Hardening |
-| `v0.6.0` | 🚧 In Progress | Next.js Frontend Client & API Integration |
+| `v0.5.0` | ✅ Released | Automated Testing & Audit Ledger |
+| `v0.6.0` | ✅ Released | Production Hardening — Rate Limiting, Pagination, Correlation ID Tracing, Lease Expiry Job |
+| `v0.7.0` | 🚧 In Progress | Next.js Frontend Client & API Integration |
 
 ---
 
@@ -495,8 +496,9 @@ Liquibase automatically applies all migrations during startup.
 | v0.3.0 | Tenant & Lease Management | ✅ |
 | v0.4.0 | Billing Engine | ✅ |
 | v0.4.1 | Pilot Feedback | ✅ |
-| v0.5.0 | Automated Testing, Audit Ledger, & Production Hardening | ✅ |
-| v0.6.0 | Next.js Frontend Client & API Integration | 🚧 |
+| v0.5.0 | Automated Testing & Audit Ledger | ✅ |
+| v0.6.0 | Production Hardening | ✅ |
+| v0.7.0 | Next.js Frontend Client & API Integration | 🚧 |
 | v1.0.0 | MVP General Availability | 📅 Planned |
 
 ---
