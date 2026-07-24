@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS public.invoices
 -- Composite unique index: one invoice per lease per billing period.
 -- Spring Batch InvoiceWriter uses INSERT ... ON CONFLICT DO NOTHING.
 -- ============================================================
-CREATE UNIQUE INDEX idx_uq_invoice_per_lease_period
+CREATE UNIQUE INDEX IF NOT EXISTS idx_uq_invoice_per_lease_period
     ON public.invoices (lease_id, billing_period);
 
 CREATE INDEX IF NOT EXISTS idx_invoices_tenant_id

@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS public.leases
 -- PENDING) leases for the same unit coexist freely — only
 -- simultaneous active tenancy is forbidden.
 -- ============================================================
-CREATE UNIQUE INDEX idx_unique_active_lease_per_unit
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_active_lease_per_unit
     ON public.leases (tenant_id, unit_id)
     WHERE status = 'ACTIVE';
 
