@@ -70,6 +70,8 @@ Terminate Lease
 
 # Technology Stack
 
+## Backend Stack
+
 | Layer | Technology | Version |
 |--------|------------|---------|
 | Language | Java | 21 LTS |
@@ -86,6 +88,20 @@ Terminate Lease
 | API Documentation | SpringDoc OpenAPI | 2.8.5 |
 | Build Tool | Maven | 3.9+ |
 | Containerization | Docker & Docker Compose | Latest |
+
+## Frontend Stack
+
+| Layer | Technology | Version |
+|--------|------------|---------|
+| Framework | Next.js (App Router) | 15 (v16.2.10 pkg) |
+| Library | React / React DOM | 19 |
+| Styling | Tailwind CSS | v4 |
+| UI Primitives | Base UI (MUI) / Radix UI | Latest |
+| State Management | Zustand | 5.0.14 |
+| Form Handling | React Hook Form + Zod | 7.x / 4.x |
+| HTTP Client | Axios | 1.18.1 |
+| API Generation | OpenAPI Generator CLI | 2.39.1 |
+| Language | TypeScript | 5.x |
 
 ---
 
@@ -179,6 +195,7 @@ PostgreSQL
 ## Prerequisites
 
 - Java 21
+- Node.js (v20+ recommended)
 - Maven 3.9+
 - Docker Desktop
 
@@ -202,19 +219,40 @@ docker compose -f local-infra/docker-compose.yml up -d
 
 ---
 
-## Run Application
+## Run Backend
 
 ```bash
 mvn spring-boot:run
 ```
 
-Application URL
-
-```
-http://localhost:8080
-```
+Application URL: `http://localhost:8080`
 
 On the first startup, Liquibase automatically creates both database schemas and applies all migrations.
+
+---
+
+## Run Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Application URL: `http://localhost:3000`
+
+---
+
+## API Client Code Generation
+
+The frontend uses an automatically generated client from the backend's OpenAPI specification. 
+Ensure the backend is running, then run this inside the `frontend` directory:
+
+```bash
+npm run generate:api
+```
+
+This compiles/updates the TypeScript-Axios client inside `frontend/src/lib/api/generated/`.
 
 ---
 
