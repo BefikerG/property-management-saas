@@ -1,0 +1,356 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   THEME REGISTRATION — Tailwind v4 CSS-first config.
+   Every token below becomes a real Tailwind utility class
+   (e.g. --color-surface-sunken → bg-surface-sunken).
+   ============================================================ */
+@theme inline {
+  /* ── shadcn/Base UI required slots (kept, repointed below) ── */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* ── Our fixed radius scale (replaces the calc() chain) ───── */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 10px;
+  --radius-2xl: 10px;
+  --radius-3xl: 10px;
+  --radius-4xl: 10px;
+  --radius-full: 9999px;
+
+  /* ── Brand primitive scale → real utilities (bg-brand-600 etc) */
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
+  /* ── Neutral primitive scale → real utilities (bg-slate-50 etc) */
+  --color-slate-25: var(--slate-25);
+  --color-slate-50: var(--slate-50);
+  --color-slate-100: var(--slate-100);
+  --color-slate-200: var(--slate-200);
+  --color-slate-300: var(--slate-300);
+  --color-slate-400: var(--slate-400);
+  --color-slate-500: var(--slate-500);
+  --color-slate-600: var(--slate-600);
+  --color-slate-700: var(--slate-700);
+  --color-slate-800: var(--slate-800);
+  --color-slate-900: var(--slate-900);
+  --color-slate-950: var(--slate-950);
+
+  /* ── Semantic surface tokens → bg-surface, bg-surface-sunken ─ */
+  --color-surface: var(--color-surface-value);
+  --color-surface-raised: var(--color-surface-raised-value);
+  --color-surface-sunken: var(--color-surface-sunken-value);
+  --color-surface-hover: var(--color-surface-hover-value);
+
+  /* ── Semantic text tokens → text-text-primary etc ──────────── */
+  --color-text-primary: var(--color-text-primary-value);
+  --color-text-secondary: var(--color-text-secondary-value);
+  --color-text-muted: var(--color-text-muted-value);
+  --color-text-disabled: var(--color-text-disabled-value);
+  --color-text-inverse: var(--color-text-inverse-value);
+  --color-text-link: var(--color-text-link-value);
+
+  /* ── Semantic status tokens → bg-success-tint, text-danger etc */
+  --color-success: var(--color-success-value);
+  --color-success-tint: var(--color-success-tint-value);
+  --color-warning: var(--color-warning-value);
+  --color-warning-tint: var(--color-warning-tint-value);
+  --color-danger: var(--color-danger-value);
+  --color-danger-tint: var(--color-danger-tint-value);
+  --color-info: var(--color-info-value);
+  --color-info-tint: var(--color-info-tint-value);
+
+  /* ── Typography scale → text-xs, text-md, text-2xl etc ─────── */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  /* ── Spacing scale → p-1 through p-16 already exist in v4 by
+     default (4px base matches Tailwind's default scale exactly,
+     so no override needed — v4's default spacing IS our spacing) */
+
+  /* ── Sizing → h-control-md, w-sidebar etc ──────────────────── */
+  --spacing-sidebar: 260px;
+  --spacing-sidebar-collapsed: 72px;
+  --spacing-header: 56px;
+  --height-control-sm: 32px;
+  --height-control-md: 36px;
+  --height-control-lg: 44px;
+  --height-row: 44px;
+  --height-row-compact: 36px;
+
+  /* ── Shadows → shadow-xs, shadow-focus-ring etc ────────────── */
+  --shadow-xs: var(--shadow-xs-value);
+  --shadow-sm: var(--shadow-sm-value);
+  --shadow-md: var(--shadow-md-value);
+  --shadow-lg: var(--shadow-lg-value);
+  --shadow-focus-ring: 0 0 0 3px var(--color-primary-tint-value);
+}
+
+/* ============================================================
+   LIGHT MODE — primitive values + semantic mappings
+   ============================================================ */
+:root {
+  /* ── shadcn/Base UI slots — repointed at OUR primitives ────── */
+  --background: var(--slate-25);
+  --foreground: var(--slate-800);
+  --card: #FFFFFF;
+  --card-foreground: var(--slate-800);
+  --popover: #FFFFFF;
+  --popover-foreground: var(--slate-800);
+  --primary: var(--brand-600);
+  --primary-foreground: #FFFFFF;
+  --secondary: var(--slate-100);
+  --secondary-foreground: var(--slate-800);
+  --muted: var(--slate-100);
+  --muted-foreground: var(--slate-500);
+  --accent: var(--slate-100);
+  --accent-foreground: var(--slate-800);
+  --destructive: var(--red-600);
+  --border: var(--slate-200);
+  --input: var(--slate-200);
+  --ring: var(--brand-600);
+  --chart-1: var(--brand-300);
+  --chart-2: var(--brand-500);
+  --chart-3: var(--brand-700);
+  --chart-4: var(--slate-400);
+  --chart-5: var(--slate-600);
+  --radius: 0.5rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: var(--slate-800);
+  --sidebar-primary: var(--brand-600);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: var(--brand-50);
+  --sidebar-accent-foreground: var(--brand-700);
+  --sidebar-border: var(--slate-200);
+  --sidebar-ring: var(--brand-600);
+
+  /* ── PRIMITIVE: Neutral Scale (Slate) ───────────────────────── */
+  --slate-25: #FAFBFC;
+  --slate-50: #F5F7FA;
+  --slate-100: #EEF1F5;
+  --slate-200: #E1E6EC;
+  --slate-300: #CBD2DB;
+  --slate-400: #9AA5B1;
+  --slate-500: #707B8A;
+  --slate-600: #525C69;
+  --slate-700: #3D4552;
+  --slate-800: #272E38;
+  --slate-900: #171B22;
+  --slate-950: #0D1015;
+
+  /* ── PRIMITIVE: Brand (Deep Blue) ────────────────────────────── */
+  --brand-50: #EEF3FC;
+  --brand-100: #D7E3F8;
+  --brand-200: #B0C7F1;
+  --brand-300: #7FA3E6;
+  --brand-400: #4E7ED9;
+  --brand-500: #2E5FC7;
+  --brand-600: #1E4FB8;
+  --brand-700: #173F94;
+  --brand-800: #132F70;
+  --brand-900: #0F2456;
+
+  /* ── PRIMITIVE: Status Colors ─────────────────────────────────── */
+  --green-100: #DCF3E4;
+  --green-600: #1A9A54;
+  --green-800: #0F6B3A;
+  --amber-100: #FCEFD1;
+  --amber-600: #C7861B;
+  --amber-800: #8F5E10;
+  --red-100: #FBE2E1;
+  --red-600: #D6392E;
+  --red-800: #9B241C;
+  --sky-100: #DEEDFB;
+  --sky-600: #1D7FCB;
+  --sky-800: #145A93;
+
+  /* ── SEMANTIC: Surface (Light) ──────────────────────────────── */
+  --color-surface-value: #FFFFFF;
+  --color-surface-raised-value: #FFFFFF;
+  --color-surface-sunken-value: var(--slate-50);
+  --color-surface-hover-value: var(--slate-100);
+
+  /* ── SEMANTIC: Text (Light) ─────────────────────────────────── */
+  --color-text-primary-value: var(--slate-800);
+  --color-text-secondary-value: var(--slate-600);
+  --color-text-muted-value: var(--slate-400);
+  --color-text-disabled-value: var(--slate-300);
+  --color-text-inverse-value: #FFFFFF;
+  --color-text-link-value: var(--brand-600);
+
+  /* ── SEMANTIC: Primary tint (Light) ─────────────────────────── */
+  --color-primary-tint-value: var(--brand-50);
+
+  /* ── SEMANTIC: Status (Light) ───────────────────────────────── */
+  --color-success-value: var(--green-600);
+  --color-success-tint-value: var(--green-100);
+  --color-warning-value: var(--amber-600);
+  --color-warning-tint-value: var(--amber-100);
+  --color-danger-value: var(--red-600);
+  --color-danger-tint-value: var(--red-100);
+  --color-info-value: var(--sky-600);
+  --color-info-tint-value: var(--sky-100);
+
+  /* ── ELEVATION (Light) ──────────────────────────────────────── */
+  --shadow-xs-value: 0 1px 2px rgba(13, 16, 21, 0.04);
+  --shadow-sm-value: 0 1px 3px rgba(13, 16, 21, 0.06), 0 1px 2px rgba(13, 16, 21, 0.04);
+  --shadow-md-value: 0 4px 8px rgba(13, 16, 21, 0.08), 0 2px 4px rgba(13, 16, 21, 0.04);
+  --shadow-lg-value: 0 12px 24px rgba(13, 16, 21, 0.10), 0 4px 8px rgba(13, 16, 21, 0.04);
+}
+
+/* ============================================================
+   DARK MODE — same semantic names, different primitive values
+   ============================================================ */
+.dark {
+  --background: var(--slate-950);
+  --foreground: var(--slate-50);
+  --card: var(--slate-900);
+  --card-foreground: var(--slate-50);
+  --popover: var(--slate-900);
+  --popover-foreground: var(--slate-50);
+  --primary: var(--brand-400);
+  --primary-foreground: var(--slate-900);
+  --secondary: var(--slate-800);
+  --secondary-foreground: var(--slate-50);
+  --muted: var(--slate-800);
+  --muted-foreground: var(--slate-400);
+  --accent: var(--slate-800);
+  --accent-foreground: var(--slate-50);
+  --destructive: #EA6058;
+  --border: var(--slate-800);
+  --input: var(--slate-800);
+  --ring: var(--brand-400);
+  --chart-1: var(--brand-300);
+  --chart-2: var(--brand-500);
+  --chart-3: var(--brand-700);
+  --chart-4: var(--slate-500);
+  --chart-5: var(--slate-300);
+  --sidebar: var(--slate-900);
+  --sidebar-foreground: var(--slate-50);
+  --sidebar-primary: var(--brand-400);
+  --sidebar-primary-foreground: var(--slate-900);
+  --sidebar-accent: rgba(30, 79, 184, 0.16);
+  --sidebar-accent-foreground: var(--brand-300);
+  --sidebar-border: var(--slate-800);
+  --sidebar-ring: var(--brand-400);
+
+  --color-surface-value: var(--slate-900);
+  --color-surface-raised-value: var(--slate-800);
+  --color-surface-sunken-value: #0A0C10;
+  --color-surface-hover-value: var(--slate-800);
+
+  --color-text-primary-value: var(--slate-50);
+  --color-text-secondary-value: var(--slate-400);
+  --color-text-muted-value: var(--slate-500);
+  --color-text-disabled-value: var(--slate-600);
+  --color-text-inverse-value: var(--slate-900);
+  --color-text-link-value: var(--brand-400);
+
+  --color-primary-tint-value: rgba(30, 79, 184, 0.16);
+
+  --color-success-value: #3FCB80;
+  --color-success-tint-value: rgba(26, 154, 84, 0.16);
+  --color-warning-value: #E0A23A;
+  --color-warning-tint-value: rgba(199, 134, 27, 0.16);
+  --color-danger-value: #EA6058;
+  --color-danger-tint-value: rgba(214, 57, 46, 0.16);
+  --color-info-value: #4FA3E8;
+  --color-info-tint-value: rgba(29, 127, 203, 0.16);
+
+  --shadow-xs-value: 0 1px 2px rgba(0, 0, 0, 0.20);
+  --shadow-sm-value: 0 1px 3px rgba(0, 0, 0, 0.24);
+  --shadow-md-value: 0 4px 8px rgba(0, 0, 0, 0.32);
+  --shadow-lg-value: 0 12px 24px rgba(0, 0, 0, 0.40);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: var(--text-base);
+    line-height: 1.5;
+  }
+  html {
+    @apply font-sans;
+  }
+
+  input[aria-invalid="true"],
+  textarea[aria-invalid="true"],
+  select[aria-invalid="true"] {
+    border-color: var(--color-danger-value);
+  }
+  input[aria-invalid="true"]:focus-visible,
+  textarea[aria-invalid="true"]:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-danger-tint-value);
+  }
+}
+
+/* ── Skeleton shimmer (Section 12.10) ──────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+.skeleton-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-surface-sunken-value) 0px,
+    var(--color-surface-hover-value) 40px,
+    var(--color-surface-sunken-value) 80px
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.5s linear infinite;
+}
