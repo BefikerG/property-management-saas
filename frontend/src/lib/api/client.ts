@@ -15,7 +15,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { refreshAccessToken } from "./auth-actions";
 
 export const axiosInstance = axios.create({
-  baseURL: "",
+  baseURL: typeof window !== "undefined" ? window.location.origin : "",
   headers: { "Content-Type": "application/json" },
 });
 

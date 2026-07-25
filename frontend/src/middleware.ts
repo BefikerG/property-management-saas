@@ -19,9 +19,9 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAuthRoute = pathname.startsWith("/login");
-  const isProtectedRoute = !isAuthRoute && pathname !== "/api";
+  const isProtectedRoute = !isAuthRoute && !pathname.startsWith("/api");
 
-  if (!hasSession && isProtectedRoute && !pathname.startsWith("/api/auth")) {
+  if (!hasSession && isProtectedRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
