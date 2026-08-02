@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node init && next dev",
+    "build": "node init && next build",
+    "start": "node init && next start",
     "lint": "eslint",
     "generate:api": "openapi-generator-cli generate -i http://localhost:8080/v3/api-docs -g typescript-axios -o src/lib/api/generated --additional-properties=supportsES6=true,withInterfaces=true,useSingleRequestParameter=true"
   },

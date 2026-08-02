@@ -8,14 +8,12 @@ target/
 application-prod.yml
 application-prod.properties
 *.env
-.env
 
 # ── IDE files ──────────────────────────────────────────────
 .idea/
 *.iml
 *.iws
 *.ipr
-.vscode/
 *.code-workspace
 
 # ── OS files ───────────────────────────────────────────────
@@ -29,3 +27,5 @@ logs/
 # ── Docker local volumes ───────────────────────────────────
 local-infra/data/
 
+config.bat
+node_modules
